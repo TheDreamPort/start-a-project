@@ -70,5 +70,6 @@ In this section we detail the process to setup a hardware host within HQ with Mi
 
 
 When you complete these steps you can return to prep host and run the following to test your connection:
+
 ```ansible windows -i hosts -m win_ping --ask-pass -u administrator```
 
