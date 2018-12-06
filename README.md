@@ -67,6 +67,8 @@ In this section we detail the process to setup a hardware host within HQ with Mi
 - Copy Z:\configureansible.ps1 C:\Users\mark\Downloads
 - Start Powershell as administrator
 - Run Set-ExecutionPolicy unrestricted, type 'Y' when prompted
-- Return to prep host and run the following to test your connection:
-⋅⋅* ```ansible windows -i hosts -m win_ping --ask-pass -u administrator```
-s
+
+
+When you complete these steps you can return to prep host and run the following to test your connection:
+```ansible windows -i hosts -m win_ping --ask-pass -u administrator```
+
