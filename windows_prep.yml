@@ -1,0 +1,56 @@
+# file - windows_prep.yml
+# -----------------------
+# use this playbook to setup your windows hosts with the items you need for your experiment. This assumes you have run
+# list_computers.py to list all of the hosts in your domain. Those computers should be copied into your hosts file in 
+# this dorectory. 
+#
+# the syntax to invoke this script is:
+# ansible-playbook windows_prep.yml --ask-pass -u Administrator
+#
+# As you can see, there are no passwords anywhere in this or ANY Ansible configuration file. They are mean to be supplied
+# on the command line.
+
+# specify the host on the cmdline with -i
+- hosts: all
+  connection: winrm 
+  
+  vars:
+    user: administrator
+    ansible_port: 5986
+    ansible_connection: winrm
+    ansible_winrm_transport: ntlm
+    ansible_winrm_server_cert_validation: ignore
+
+  gather_facts: false
+  remote_user: "{{ user }}"
+  
+  tasks:
+#    - name: run a powershell script
+#      script: scripts/install_chrome.ps1
+#      register: out
+    - name: Install multiple packages
+      win_chocolatey:
+        name: '{{ item }}'
+        state: present
+      with_items:
+      - googlechrome
+      - sublimetext3      
+    # I have been using C:\Installer for custom installer and EXE that you run on each target. This task ensures
+    # that directory exists.
+    - name: Create Dreamport Installer directory
+      win_file:
+        path: C:\Installer
+        state: directory      
+    # this task shows how to copy a file from your local box (where you invoked Ansible) to your target host(s)
+    - name: Copy 7zip installer
+      win_copy:
+        src: /home/developer/Downloads/7z1805-x64.msi
+        dest: c:\Installer\7z1805-x64.msi
+    # this task shows how to invoke an MSI to install something. As you can see below you can use the 'path' setting
+    # to download from a URL instead! Make sure you know your command line arguments to install your MSI.
+    - name: Install 7Zip
+      win_package:
+        # path: https://www.7-zip.org/a/7z1805-x64.msi
+        path: c:\Installer\7z1805-x64.msi
+        arguments:  /q INSTALLDIR="C:\Program Files\7-Zip" 
+        state: present

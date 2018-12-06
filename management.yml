@@ -1,0 +1,25 @@
+- hosts: all
+
+  vars:
+    user: administrator
+    domain: hq1.com
+    should_harden: false
+
+  gather_facts: true
+  remote_user: "{{ user }}"
+  become: true
+
+  roles:
+    - role: mrlesmithjr.rsyslog
+      rsyslog_config: true
+      rsyslog_pri_domain_name: "{{ domain }}"
+      rsyslog_allow_udp: true    
+    - role: sansible.security_hardening
+      when: should_harden 
+      sansible_security_hardening_purge_old_kernels: yes
+    - role: iyp-uk.linux-active-directory
+      lad_domain_name: "hq1.com"
+      lad_ldap_server: "hqadc16.hq1.com"
+      lad_join_username: "cm_dj"
+      lad_join_password: "dreamportj!89D"
+      lad_smb_workgroup: "HQ1"

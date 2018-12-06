@@ -1,0 +1,2 @@
+# sudo apt install libkrb5-dev python-winrm
+pywinrm[Kerberos]

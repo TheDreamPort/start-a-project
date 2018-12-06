@@ -1,0 +1,62 @@
+#
+# initial bootstrap of a fresh ubuntu 16.04 or Debian system to enable additional
+# ansible functionality
+#
+#
+# NOTE: for a Debian system, make sure you first do the following:
+#     su root
+#     apt-get install sudo
+#     adduser sysadmin sudo
+# otherwise the package installations below will fail.
+
+# specify the host on the cmdline with -i
+- hosts: all
+
+  vars:
+    user: administrator
+
+  gather_facts: false
+  remote_user: "{{ user }}"
+  become: true
+  
+  tasks:
+    # https://stackoverflow.com/questions/45054757/ansible-launch-ssh-copy-id-before-running-play/45055575#45055575
+    # prompts for password if you haven't done the ssh-copy-id yet
+    - set_fact:
+        rem_user: "{{ ansible_user | default(lookup('env','USER')) }}"
+        rem_host: "{{ ansible_host }}"
+    - local_action: command ssh-copy-id {{ rem_user }}@{{ rem_host }}
+
+
+    # Run apt-get update in case the package lists are out of date
+    - name: update package lists
+      become: true
+      raw: apt-get update
+
+    # JLE - this did not work for me for copying ssh key - always returned fatal UNREACHABLE SSH Error
+    # the above means of performing ssh-copy-id does work.
+#    - name: copy ssh id
+#      authorized_key:
+#        user: "{{ user }}"
+#        state: present
+#        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    # bootstrap python on the box so we can do ansible things
+    - name: install python and pip
+      become: true
+      raw: apt-get install -y {{ item }}
+      with_items:
+        - python
+        - python-pip
+
+    - name: upgrade pip
+      become: true
+      command: pip install --upgrade pip==18.0
+
+    - name: upgrade packages
+      become: true
+      apt:
+        force_apt_get: true
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400    # one day

@@ -1,0 +1,90 @@
+- hosts: all
+
+  vars:
+    docker_registry: 127.0.0.1:5000
+    user: administrator
+    domain: hq1.com
+    should_harden: false
+    docker_dns_resolvers:
+      - 10.148.0.3
+      - 8.8.8.8    
+    gitlab_config_dir: "/srv/gitlab/config"
+    gitlab_logs_dir: "/srv/gitlab/logs"
+    gitlab_data_dir: "/srv/gitlab/data"
+    gitlab_image: "gitlab/gitlab-ce:latest"
+    gitlab_ssh_port: "2222"
+    gitlab_https_port: "127.0.0.1:10443"
+    gitlab_http_port: "127.0.0.1:10080"
+    gitlab_site: "gitlab.hq1.com"
+    gitlab_smtp_server: "mail.example.com"
+    gitlab_smtp_user: "gitlab@hq1.com"
+    gitlab_smtp_password: "mypassword"
+    gitlab_smtp_domain: "hq1.com"
+
+  gather_facts: true
+  remote_user: "{{ user }}"
+  become: true
+
+  roles:
+    - role: iyp-uk.linux-active-directory
+      lad_domain_name: "hq1.com"
+      lad_ldap_server: "hqadc16.hq1.com"
+      lad_join_username: "cm_dj"
+      lad_join_password: "dreamportj!89D"
+      lad_smb_workgroup: "HQ1" 
+    - role: mrlesmithjr.rsyslog
+      rsyslog_config: true
+      rsyslog_pri_domain_name: "{{ domain }}"
+      rsyslog_servers: 
+        - name: 'management.{{ rsyslog_pri_domain_name }}'
+          proto: udp
+          port: 514
+          selectors:
+            - '*.*'
+    - role: sansible.security_hardening
+      when: should_harden 
+      sansible_security_hardening_purge_old_kernels: yes
+    - role: mongrelion.docker
+      docker_version: 18.06.1
+      setup_script_md5_sum: e52872f30e49c85d839ccecc3d676ca0
+      docker_config:
+        insecure-registries:
+        - "{{ docker_registry }}"
+        dns: "{{ docker_dns_resolvers }}"
+        storage-driver: "overlay2"
+    - role: suzuki-shunsuke.docker-compose
+      docker_compose_version: 1.22.0
+  pre_tasks:
+    - name: upgrade pip
+      become: true
+      command: pip install --upgrade pip==18.0
+    - name: Create gitlab directories
+      file: path={{ item }} recurse=yes state=directory
+      with_items:
+        - "{{ gitlab_config_dir }}"
+        - "{{ gitlab_logs_dir }}"
+        - "{{ gitlab_data_dir }}"
+
+  tasks:
+    - name: adding existing user '{{ user }}' to group docker
+      user:
+        name: '{{ user }}'
+        groups: docker
+        append: yes    
+    - name: Install Gitlab container
+      docker_container:
+        name: gitlab
+        image: "{{ gitlab_image }}"
+        state: started
+        ports:
+          - "2222:22"
+          - "80:80"
+          - "443:443"
+        volumes:
+          - "{{ gitlab_config_dir }}:/etc/gitlab"
+          - "{{ gitlab_logs_dir }}:/var/log/gitlab"
+          - "{{ gitlab_data_dir }}:/var/opt/gitlab"
+        restart_policy: always
+           
+    - name: deploy gitlab configuration
+      template: src=gitlab.rb.j2 dest="{{ gitlab_config_dir }}/gitlab.rb" owner=root group=root mode=0644
