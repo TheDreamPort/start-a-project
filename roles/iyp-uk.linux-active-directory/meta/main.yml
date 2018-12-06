@@ -1,0 +1,17 @@
+galaxy_info:
+  author: miaoulafrite
+  description: Linux join Active Directory
+  company: IYP UK
+  license: license (MIT)
+  min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - xenial
+  galaxy_tags:
+    - active directory
+    - kerberos
+    - samba
+    - sssd
+
+dependencies: []

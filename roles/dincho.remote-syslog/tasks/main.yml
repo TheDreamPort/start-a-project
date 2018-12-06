@@ -1,0 +1,55 @@
+---
+- name: download package
+  get_url:
+    url: "{{ remote_syslog_package_url }}"
+    dest: ~/remote_syslog_{{ remote_syslog_version }}.tar.gz
+    owner: root
+    group: root
+    mode: 0644
+  register: download
+
+- name: unarchive package
+  command: tar -xzf remote_syslog_{{ remote_syslog_version }}.tar.gz
+  args:
+    chdir: ~/
+  when: download.changed
+
+- name: copy binary
+  command: cp remote_syslog /usr/local/bin/remote_syslog
+  args:
+    chdir: ~/remote_syslog
+    creates: /usr/local/bin/remote_syslog
+  notify:
+    - restart remote_syslog
+
+- name: copy upstart script
+  copy: src=remote_syslog.upstart.conf dest=/etc/init/remote_syslog.conf
+  when: ansible_distribution == 'Ubuntu'
+
+- name: copy init script
+  copy:
+    src: remote_syslog.init.d
+    dest: /etc/init.d/remote_syslog
+    mode: 0744
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'CentOS'
+
+- name: Ensure syslog host is set
+  fail: msg="You must set syslog host (remote_syslog_host)"
+  when: remote_syslog_host is not defined
+
+- name: Ensure syslog port is set
+  fail: msg="You must set syslog port (remote_syslog_port)"
+  when: remote_syslog_port is not defined
+
+- name: copy log_files.yml
+  template:
+    src: log_files.yml.j2
+    dest: /etc/log_files.yml
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart remote_syslog
+
+- name: remote_syslog is running and enabled
+  service: name=remote_syslog state=started enabled=yes

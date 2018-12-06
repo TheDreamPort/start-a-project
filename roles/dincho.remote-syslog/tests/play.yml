@@ -1,0 +1,8 @@
+# test file for percona-server
+---
+- hosts: all
+  roles:
+    - ../../
+  vars:
+    remote_syslog_host: logs.papertrailapp.com
+    remote_syslog_port: 12345

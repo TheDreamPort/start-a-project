@@ -1,0 +1,4 @@
+---
+remote_syslog_version: v0.15
+remote_syslog_files: []
+remote_syslog_protocol: tls

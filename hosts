@@ -1,0 +1,44 @@
+# This file is critical to making the Ansible based setup of the Dreamport project hosts a success. You should ensure you have run
+# the companion Python script list_computers.py to make sure that you have 
+#
+#
+# - please note the WDS host is commented out. It is considered a special host and shouldn't be messed with.
+# - please note that the app-server and management VMs are also commented out. These are linux hosts that are companion
+#   hosts for the HQ experiments.
+#
+# Generated On:
+# 5 December 2018
+[windows]
+HQADC16.hq1.com        
+#WDS.hq1.com            
+MININT-2B1IUDO.hq1.com 
+MISIDRE-TRS9FG3.hq1.com
+MISIDRE-J7PBD8H.hq1.com
+MISIDRE-SFFK8U3.hq1.com
+WINDOWS-CO3ROVQ.hq1.com
+WINDOWS-4HUIFAU.hq1.com
+WINDOWS-LL6NVTH.hq1.com
+WINDOWS-3OMLQ30.hq1.com
+WINDOWS-9UKDUGK.hq1.com
+WINDOWS-9B2QAO2.hq1.com
+WINDOWS-J13F2FP.hq1.com
+WINDOWS-4A72DK7.hq1.com
+WINDOWS-C90TSJL.hq1.com
+WINDOWS-8886CKV.hq1.com
+WINDOWS-NUCKC2M.hq1.com
+WINDOWS-OFPE262.hq1.com
+WINDOWS-B1LH55C.hq1.com
+WINDOWS-DJLP83E.hq1.com
+WINDOWS-2285A37.hq1.com
+WINDOWS-AUPC1C5.hq1.com
+WINDOWS-EB3V9Q0.hq1.com
+WINDOWS-ALBPSS7.hq1.com
+WINDOWS-F5CDUB2.hq1.com
+WINDOWS-5M8M95H.hq1.com
+WINDOWS-7N4QIHD.hq1.com
+WINDOWS-66H04DH.hq1.com
+WINDOWS-FRM81M1.hq1.com
+WINDOWS-CQPHNSE.hq1.com
+#management.hq1.com     
+#app-server.hq1.com     
+GUINEAPIG.hq1.com 
