@@ -23,7 +23,9 @@ ansible 2.7.4
 ### Update your Windows inventory
 We operate under the assumption that you have either installed all of the hosts you will use or are joining a project that is in-progress. You need to update your Windows host inventory  (the file hosts).
 
-./list_computers.py Administrator <PASSWORD>
+./list_computers.py Administrator PASSWORD 
+
+as in the following example:
 	
 ```
 developer@ubuntu:~/workspace/start-a-project$ ./list_computers.py Administrator <PASSWORD>
