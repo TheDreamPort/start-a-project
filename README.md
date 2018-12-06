@@ -56,6 +56,15 @@ WINDOWS-DJLP83E.hq1.com
 WINDOWS-2285A37.hq1.com
 WINDOWS-AUPC1C5.hq1.com
 ```
+# Installing HQ Hosts 
+The most time consuming part of setup for activities on our network is installing hosts with an operating system. As we have stated previously we use WDS to install Microsoft Windows within our network. 
+
+## Windows Host
+More detail coming soon
+
+# Setup HQ for an Experiment
+We will go into detail on how to setup HQ for an actual experiment. 
+
 ## Setup Windows Host
 In this section we detail the process to setup a hardware host within HQ with Microsoft Windows. As you can see below, we have gone through painful efforts to setup the Windows Deployment Services (WDS) to automatically push out Microsoft Windows images to our hosts.
 
