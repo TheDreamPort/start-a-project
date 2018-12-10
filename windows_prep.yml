@@ -28,13 +28,25 @@
 #    - name: run a powershell script
 #      script: scripts/install_chrome.ps1
 #      register: out
+    - name: enable failure auditing for the subcategory "File System"
+      win_audit_policy_system:
+        subcategory: File System
+        audit_type: failure
+
+    - name: enable all auditing types for the category "Account logon events"
+      win_audit_policy_system:
+        category: Account logon events
+        audit_type: success, failure
+
     - name: Install multiple packages
       win_chocolatey:
         name: '{{ item }}'
         state: present
       with_items:
       - googlechrome
-      - sublimetext3      
+      - sublimetext3
+      - adobereader
+      - firefox      
     # I have been using C:\Installer for custom installer and EXE that you run on each target. This task ensures
     # that directory exists.
     - name: Create Dreamport Installer directory

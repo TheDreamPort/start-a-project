@@ -11,6 +11,7 @@
     gitlab_config_dir: "/srv/gitlab/config"
     gitlab_logs_dir: "/srv/gitlab/logs"
     gitlab_data_dir: "/srv/gitlab/data"
+    squid_image: "datadog/squid"
     gitlab_image: "gitlab/gitlab-ce:latest"
     gitlab_ssh_port: "2222"
     gitlab_https_port: "127.0.0.1:10443"
@@ -52,6 +53,9 @@
         - "{{ docker_registry }}"
         dns: "{{ docker_dns_resolvers }}"
         storage-driver: "overlay2"
+        log-driver: "syslog"
+        log-opts:
+          syslog-address: "udp://10.148.0.4:514"
     - role: suzuki-shunsuke.docker-compose
       docker_compose_version: 1.22.0
   pre_tasks:
@@ -71,6 +75,16 @@
         name: '{{ user }}'
         groups: docker
         append: yes    
+    - name: Install Squid Proxy
+      docker_container:
+        name: squid-proxy
+        image: "{{ squid_image }}"
+        ports:
+          - "3128:3128"
+        volumes:
+          - "/srv/docker/squid/cache:/var/spool/squid"
+          - "/srv/docker/squid/log:/var/log/squid"
+        restart_policy: always        
     - name: Install Gitlab container
       docker_container:
         name: gitlab
@@ -85,6 +99,21 @@
           - "{{ gitlab_logs_dir }}:/var/log/gitlab"
           - "{{ gitlab_data_dir }}:/var/opt/gitlab"
         restart_policy: always
-           
+    - name: Install DVWA
+      docker_container:
+        name: dvwa-target
+        image: "vulnerables/web-dvwa"
+        state: started
+        ports:
+          - "8088:80"
+        restart_policy: always
+    - name: Install Multilidae
+      docker_container:
+        name: multilidae-target
+        image: "citizenstig/nowasp"
+        state: started
+        ports:
+          - "8888:80"
+        restart_policy: always                     
     - name: deploy gitlab configuration
       template: src=gitlab.rb.j2 dest="{{ gitlab_config_dir }}/gitlab.rb" owner=root group=root mode=0644
