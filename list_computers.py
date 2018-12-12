@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# pip install pywinrm 
+#
 import sys
 import winrm
 from winrm.protocol import Protocol

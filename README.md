@@ -23,7 +23,14 @@ ansible 2.7.4
 ### Update your Windows inventory
 We operate under the assumption that you have either installed all of the hosts you will use or are joining a project that is in-progress. You need to update your Windows host inventory  (the file hosts).
 
+sudo apt install libkrb5-dev
+pip install pywinrm[kerberos]
+
+sudo pip2.7 install https://github.com/diyan/pywinrm/archive/master.zip#egg=pywinrm
+
 ./list_computers.py Administrator PASSWORD 
+
+be careful that you didn't install a package with the wrong version of pip
 
 as in the following example:
 	

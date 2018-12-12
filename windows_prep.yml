@@ -3,13 +3,29 @@
 # use this playbook to setup your windows hosts with the items you need for your experiment. This assumes you have run
 # list_computers.py to list all of the hosts in your domain. Those computers should be copied into your hosts file in 
 # this dorectory. 
+#################
+# MAKE SURE TO RUN list_computers.py before this:
+# ./list_computers.py Administrator <PASSWORD> > hosts
 #
+# you should delete the Domain Controller, WDS and linux servers from this list though
+#################
 # the syntax to invoke this script is:
-# ansible-playbook windows_prep.yml --ask-pass -u Administrator
+# ansible-playbook --inventory-file=hosts windows_prep.yml --ask-pass -u Administrator
 #
 # As you can see, there are no passwords anywhere in this or ANY Ansible configuration file. They are mean to be supplied
 # on the command line.
+#################
+# don't be alarmed if some hosts fail to be modified via ansible, 
+# it simply means they were powered off...
+#
+# TASK [enable failure auditing for the subcategory "File System"] **************************************************************************
+# fatal: [MISIDRE-SFFK8U3.hq1.com]: UNREACHABLE! => {"changed": false, "msg": "ntlm: HTTPSConnectionPool(host='misidre-sffk8u3.hq1.com', port=5986): Max retries exceeded with url: /wsman (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f8374287850>: Failed to establish a new connection: [Errno -2] Name or service not known',))", "unreachable": true}
+# fatal: [MISIDRE-TRS9FG3.hq1.com]: UNREACHABLE! => {"changed": false, "msg": "ntlm: HTTPSConnectionPool(host='misidre-trs9fg3.hq1.com', port=5986): Max retries exceeded with url: /wsman (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f837429c3d0>: Failed to establish a new connection: [Errno 111] Connection refused',))", "unreachable": true}
+# fatal: [MININT-2B1IUDO.hq1.com]: UNREACHABLE! => {"changed": false, "msg": "ntlm: HTTPSConnectionPool(host='minint-2b1iudo.hq1.com', port=5986): Max retries exceeded with url: /wsman (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f837405fe10>: Failed to establish a new connection: [Errno 111] Connection refused',))", "unreachable": true}
+# fatal: [MISIDRE-J7PBD8H.hq1.com]: UNREACHABLE! => {"changed": false, "msg": "ntlm: HTTPSConnectionPool(host='misidre-j7pbd8h.hq1.com', port=5986): Max retries exceeded with url: /wsman (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f8374ada110>: Failed to establish a new connection: [Errno 111] Connection refused',))", "unreachable": true}
+# fatal: [WINDOWS-C90TSJL.hq1.com]: UNREACHABLE! => {"changed": false, "msg": "ntlm: HTTPSConnectionPool(host='windows-c90tsjl.hq1.com', port=5986): Max retries exceeded with url: /wsman (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f8374ad0d50>: Failed to establish a new connection: [Errno -2] Name or service not known',))", "unreachable": true}
 
+#################
 # specify the host on the cmdline with -i
 - hosts: all
   connection: winrm 
@@ -28,14 +44,14 @@
 #    - name: run a powershell script
 #      script: scripts/install_chrome.ps1
 #      register: out
-    - name: enable failure auditing for the subcategory "File System"
+    - name: enable failure auditing for the subcategory "System"
       win_audit_policy_system:
         subcategory: File System
         audit_type: failure
 
     - name: enable all auditing types for the category "Account logon events"
       win_audit_policy_system:
-        category: Account logon events
+        category: Account Logon
         audit_type: success, failure
 
     - name: Install multiple packages
@@ -43,10 +59,13 @@
         name: '{{ item }}'
         state: present
       with_items:
+      - 7zip
       - googlechrome
       - sublimetext3
       - adobereader
-      - firefox      
+      - firefox    
+      - libreoffice-fresh   
+      - skype
     # I have been using C:\Installer for custom installer and EXE that you run on each target. This task ensures
     # that directory exists.
     - name: Create Dreamport Installer directory
@@ -54,15 +73,15 @@
         path: C:\Installer
         state: directory      
     # this task shows how to copy a file from your local box (where you invoked Ansible) to your target host(s)
-    - name: Copy 7zip installer
-      win_copy:
-        src: /home/developer/Downloads/7z1805-x64.msi
-        dest: c:\Installer\7z1805-x64.msi
+    #- name: Copy 7zip installer
+    #  win_copy:
+    #    src: /home/developer/Downloads/7z1805-x64.msi
+    #    dest: c:\Installer\7z1805-x64.msi
     # this task shows how to invoke an MSI to install something. As you can see below you can use the 'path' setting
     # to download from a URL instead! Make sure you know your command line arguments to install your MSI.
-    - name: Install 7Zip
-      win_package:
+    #- name: Install 7Zip
+    #  win_package:
         # path: https://www.7-zip.org/a/7z1805-x64.msi
-        path: c:\Installer\7z1805-x64.msi
-        arguments:  /q INSTALLDIR="C:\Program Files\7-Zip" 
-        state: present
+    #    path: c:\Installer\7z1805-x64.msi
+    #    arguments:  /q INSTALLDIR="C:\Program Files\7-Zip" 
+    #    state: present
